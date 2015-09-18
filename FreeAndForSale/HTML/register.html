@@ -1,0 +1,220 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Register</title>
+    <link rel="stylesheet" type="text/css" href="../style/pure-min.css">
+    <link rel="stylesheet" type="text/css" href="../style/marketing.css">
+    <link rel="stylesheet" type="text/css" href="../style/side-menu.css">
+    <script src="../Scripts/jquery-1.10.2.min.js"></script>
+</head>
+<body>
+    <div class="header">
+        <div class="home-menu pure-menu pure-menu-horizontal pure-menu-fixed">
+            <a style="color: white;font-size: 180%;text-decoration : none; vertical-align: middle" href="index.html">People Directory</a>
+
+            <ul class="pure-menu-list">
+                <li class="pure-menu-item "><a href="index.html" class="pure-menu-link">Home</a></li>
+                
+               
+            </ul>
+        </div>
+    </div>
+
+    <div style="top:25%;left:10%;position:fixed;">
+        <text style="font-size:18px;">
+            A place to enter new Users
+
+        </text>
+
+    </div>
+    <style type="text/css">
+        .invalid {
+            background-image: url(image/invalid.png);
+            background-position: right top;
+            background-repeat: no-repeat;
+            background-color: #FFCCCC;
+        }
+
+        .valid {
+            background-image: url(image/valid.png);
+            background-position: right top;
+            background-repeat: no-repeat;
+            background-color: #FFFFFF;
+        }
+
+         .error,.error1,.error2,.error3,.error4{
+                display: none;
+                margin-left: 10px;
+                color: red;
+            }       
+
+
+      
+}
+ 
+input.valid, textarea.valid{
+    border: 2px solid green;
+}
+    </style>
+
+    <span style="top:50px;left:50%;position:relative;">
+        <form id="register_form" class="pure-form">
+            <input id="fname" type="text" style="width:20%" placeholder="First Name" required="required"/>
+            <span class="error">Please Enter your First Name</span><br/>
+            <input id="lname" type="text" style="width:20%" placeholder="Last Name"/>
+            <span class="error1">Please Enter your Last Name</span><br />
+            <textarea id="add" placeholder="Address"></textarea>
+            <span class="error2">Please Enter your Address</span><br /><br/>
+            <!-- <input id="age" type="text" style="width:20%" placeholder="Age" required="required"/><br>-->
+            <select id="age">
+            <option selected="selected">Please Select Your Age</option></select><br/><br/>
+            <textarea id="interests" placeholder="Interests" ></textarea>
+            <span class="error3">Please Enter your Interests</span><br /><br/>
+            <input id="img1" type="file" style="width:20%;" class="pure-input-rounded" >
+            <span class="error4">Please attach an image</span><br />
+            
+           
+            <br><br>
+            <button id="submit" type="button" class="pure-button pure-button-primary">Register</button>
+            <button id="reset" type="reset" class="pure-button pure-button-primary">Reset</button>
+        </form>
+    </span>
+    
+    <script>
+        $(document).ready(function () {
+          
+
+            $(function () {
+                var $select = $("#age");
+                for (i = 15; i <= 100; i++) {
+                    $select.append($('<option></option>').val(i).html(i))
+                }
+            });
+
+            function regajax()
+            {
+                event.preventDefault();
+                var fname = $("#fname").val();
+                var lname = $("#lname").val();
+                var address = $("#add").val();
+                var age = $("#age option:selected").text();
+                
+                var interests = $("#interests").val();
+
+               
+                    
+                var login_details = {fname: fname, lname: lname,address: address,age: age, interests: interests};
+                
+
+                $.ajax({
+                    type: "PUT",
+                    data: JSON.stringify(login_details),
+                    url: "/api/register/",
+                    contentType: "application/json",
+                    success: function (resp) {
+
+                        var files = $("#img1").get(0).files;
+
+                        $(".error4").hide();
+                        if (files.length > 0) {
+
+
+                            
+                            var fileType = files[0]["type"];
+                            var ValidImageTypes = ["image/gif", "image/jpeg", "image/png"];
+                            if ($.inArray(fileType, ValidImageTypes) < 0) {
+                                $(".error4").text("Supported Formats are gif, jpeg, png");
+                                $(".error4").show();
+                            }
+
+                            else {
+
+
+                                var data = new FormData();
+                                for (i = 0; i < files.length; i++) {
+                                    data.append("file" + i, files[i]);
+                                }
+
+                                // we have the response
+                               // alert("Successfully Signed up");
+
+                                $.ajax({
+                                    type: "POST",
+                                    url: "/api/addimage/" + fname + "/" + address,
+                                    contentType: false,
+                                    processData: false,
+                                    data: data,
+                                    success: function (results) {
+                                        for (i = 0; i < results.length; i++) {
+                                            //  alert(results[i]);
+                                            location.href = "index.html";
+                                        }
+                                    },
+                                    error: function (e) {
+                                        alert('Please login to add images' + e);
+                                    }
+                                });
+                            }
+                        }
+                        else {
+                            $(".error4").text("Please attach an Image");
+                            $(".error4").show();
+                        }
+                    
+                    },
+                      
+                    error: function (e) {
+                        alert('' + e);
+                    }
+                });
+                //alert(pid);
+            }
+
+                
+     
+       
+
+       
+
+            $(document).keypress(function(event) {
+            if (event.keyCode == 13) {
+                regajax();
+            }
+            });
+
+
+
+            $("#submit").on('click', function () {
+                $(".error").hide();
+                $(".error1").hide();
+                $(".error2").hide();
+                $(".error3").hide();
+                $(".error4").hide();
+
+                if ($("#fname").val() == "") {
+                    $(".error").show();
+                }
+                if ($("#lname").val() == "") {
+                    $(".error1").show();
+                }
+                if ($("#add").val() == "") {
+                    $(".error2").show();
+                }
+                if ($("#interests").val() == "") {
+                    $(".error3").show();
+                }
+                
+                else {
+
+
+                    regajax();
+                }
+                });
+
+
+            });
+
+    
+    </script>
+</body>
+</html>

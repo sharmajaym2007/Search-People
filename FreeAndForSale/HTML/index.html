@@ -1,0 +1,175 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Home</title>
+    <link rel="stylesheet" type="text/css" href="../style/pure-min.css">
+    <link rel="stylesheet" type="text/css" href="../style/marketing.css">
+    <link rel="stylesheet" type="text/css" href="../style/side-menu.css">
+    <script src="../Scripts/jquery-1.10.2.js"></script>
+    <style type="text/css">
+        
+      .container {
+  position: relative;
+  height: 300px;
+}
+.img1 {
+  position: absolute;
+  left: 18%;
+  width: 200px;
+}
+.img2 {
+  position: absolute;
+  left: 40%;
+  width: 200px;
+}
+.section {
+  
+  margin-left: 63%;
+  margin-right: 5%;
+  margin-top: 6%;
+}
+#errorimg{
+    margin-left: 55%;
+  margin-right: 15%;
+  margin-top: 20%;
+}
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="home-menu pure-menu pure-menu-horizontal pure-menu-fixed">
+            <a style="color: white;font-size: 180%;text-decoration : none; vertical-align: middle" href="index.html">People Directory</a>
+
+            <ul class="pure-menu-list">
+              
+                <li class="pure-menu-item"><a href="register.html" class="pure-menu-link">Register</a></li>
+               
+            </ul>
+        </div>
+    </div>
+
+    <div id="menu">
+        <div class="pure-menu">
+
+            <ul class="pure-menu-list">
+                <li class="pure-menu-item"><input style="height:30px;margin-top:5px;margin-left:2px;" type="text" id="search_bar"/> <a href="#" id="search" class="pure-menu-link">Search </a></li>
+                
+               
+
+              
+            </ul>
+        </div>
+    </div>
+   
+    
+    
+    <p id="errorimg"></p>
+    
+    
+   
+    
+    
+       
+
+    <script>
+              
+        
+        function ajaxdisp()
+        {
+           
+            var key = $("#search_bar").val();
+            //alert(key);
+            if (key == "") {
+                $("#errorimg").text("Enter text to find Image");
+            }
+            else {
+                $(".pre").remove();
+
+                var data = $.ajax({
+                    type: "GET",
+                    url: "/api/getpeople/search/" + key,
+                    global: false,
+                    async: false,
+                    dataType: 'json',
+                    success: function (resp) {
+                        // we have the response
+                        // alert("Server said\n '" + resp + "'");
+                        return resp;
+                    },
+                    error: function (e) {
+
+                        $("#errorimg").text("No Image Found");
+                        //alert('Server is busy. Please try again !!');
+                    }
+                }).responseText;
+
+
+
+                var json = $.parseJSON(data);
+                //document.write(data);
+                document.getElementById("errorimg").style.display = "none";
+                $(json).each(function (i, val) {
+                    var userid = "userid";
+                    var fname = "fname";
+                    var lname = "lname";
+                    var address = "address";
+                    var age = "age";
+                    var interests = "interests";
+
+                    $.each(val, function (k, v) {
+
+                        if (k == userid)
+                            userid = v;
+                        if (k == fname)
+                            fname = v;
+                        if (k == lname)
+                            lname = v;
+
+                        if (k == address)
+                            address = v;
+                        if (k == age)
+                            age = v;
+                        if (k == interests) {
+                            interests = v;
+
+                        }
+
+                    });
+                    //alert(pname + price);
+                    display(userid, fname, lname, address, age, interests);
+                });
+            }
+        }
+         
+     
+        $("#search").on('click', function () {
+           
+            ajaxdisp();
+            
+            
+        });
+
+        $(document).keypress(function(event) {
+            if (event.keyCode == 13) {
+                
+                ajaxdisp();
+                    
+                     
+                      
+            }
+        });
+        function display(userid, fname,lname, address, age, interests) {
+           
+            var s1 = "/api/getimage/" + userid;
+            
+            var add = '<div class="container pre" id="s"><div class="img1"><img src="' + s1 + '" style="display: inline;width:100%" ></div><div class="section"><h2><text>' + fname + " " + lname + '</text></h2><h4><text>' + address + '</text></h4><h4 style="display: inline;">Age :</h4><text>' + age + '</text></h4><br><h4 style="display: inline;">Interests :</h4><text>' + interests + '</text></div>';
+            // alert(add);
+           
+            $("body").append(add); // Append new elements
+        }
+
+    </script>
+    
+</body>
+</html>
